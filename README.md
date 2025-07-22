@@ -71,6 +71,6 @@ Fork the repository and submit pull requests. Contributions are welcome!
 
 ## License
 
-This project is licensed under the [CC BY-NC 4.0 License](./LICENSE.md).  
+This project is licensed under the [CC BY-NC 4.0 License](./LICENSE).  
 **You can use, share, and change this code for free — but you must give credit and you can't use it for anything commercial.**
 
