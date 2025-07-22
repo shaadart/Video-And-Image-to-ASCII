@@ -18,7 +18,8 @@
 
 ---
 
-![Death of Pixels Demo](readme%20files/Screen-Recording.mp4)
+https://github.com/user-attachments/assets/3e1bb289-21c3-4fb8-9947-12ff042b32ea
+
 
 ## How It Works
 
