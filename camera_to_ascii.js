@@ -1,12 +1,4 @@
-/*
------ Coding Tutorial by Patt Vira ----- 
-Name: ASCII Art (with Video Webcam)
-Video Tutorial: https://youtu.be/4IyeLc6J1Uo
 
-Connect with Patt: @pattvira
-https://www.pattvira.com/
-----------------------------------------
-*/
 
 let asciiChar = "$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\|()1{}[]?-_+~<>i!lI;:,^`'. "
 // let asciiChar = " .:-=+*#%@";
