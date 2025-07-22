@@ -1,6 +1,6 @@
 # DEATH OF PIXELS
 
-![Death of Pixels Banner](../readme files/banner.png)
+![Death of Pixels Banner](readme%20files/banner.png)
 
 ## Welcome to Death of Pixels
 
@@ -18,7 +18,7 @@
 
 ---
 
-![Death of Pixels Banner](../readme files/Screen-Recording.mp4)
+![Death of Pixels Demo](readme%20files/Screen-Recording.mp4)
 
 ## How It Works
 
