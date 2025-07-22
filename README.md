@@ -1,6 +1,6 @@
 # DEATH OF PIXELS
 
-![Project Banner](https://github.com/user-attachments/assets/a3b7bb59-fef7-4411-a6b0-73f8d4113316)
+![Death of Pixels Banner](../readme files/banner.png)
 
 ## Welcome to Death of Pixels
 
@@ -17,6 +17,8 @@
 - **Save Your Art**: Download as text or image files.
 
 ---
+
+![Death of Pixels Banner](../readme files/Screen-Recording.mp4)
 
 ## How It Works
 

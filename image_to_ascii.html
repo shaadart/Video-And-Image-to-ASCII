@@ -84,8 +84,11 @@
             img = loadedImg;
             imgLoaded = true;
 
-            const aspectRatio = img.height / img.width;
-            resizeCanvas(canvasW , canvasH * aspectRatio);
+            // Adjust canvas size to maintain a constant height of 1080 and dynamic width
+            const aspectRatio = img.width / img.height;
+            canvasH = 720;
+            canvasW = canvasH * aspectRatio;
+            resizeCanvas(canvasW, canvasH);
           });
         }
       };
