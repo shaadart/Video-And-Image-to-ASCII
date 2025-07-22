@@ -1,23 +1,71 @@
 # DEATH OF PIXELS
-https://github.com/user-attachments/assets/a3b7bb59-fef7-4411-a6b0-73f8d4113316
 
+![Project Banner](https://github.com/user-attachments/assets/a3b7bb59-fef7-4411-a6b0-73f8d4113316)
 
+## Welcome to Death of Pixels
+
+"Death of Pixels" is a fun tool that turns your videos, images, and live camera feeds into retro ASCII art animations. Perfect for YouTubers, artists, and anyone who loves creative experiments.
+
+---
 
 ## Features
-- **Image to ASCII**: Convert static images into ASCII art with adjustable depth, brightness, contrast, and custom character sets.
-- **Video to ASCII**: Transform video files into dynamic ASCII animations.
-- **Camera to ASCII**: Use your webcam to generate real-time ASCII art.
-- **Customizable Output**: Adjust canvas size, ASCII depth, and colors for personalized results.
-- **Downloadable Art**: Save your creations as text or image files.
 
-## Project Structure
-- **image_to_ascii.html / image_to_ascii.js**: Handles image-to-ASCII conversion.
-- **video_to_ascii.html / video_to_ascii.js**: Manages video-to-ASCII transformations.
-- **camera_to_ascii.html / camera_to_ascii.js**: Enables real-time ASCII art from a webcam feed.
-- **style.css**: Defines the retro-inspired styling for the interface.
-- **index.html**: Entry point for the project.
-- **img.jpg**: Sample image for testing.
+- **Image to ASCII**: Convert images into ASCII art.
+- **Video to ASCII**: Watch your videos come alive in ASCII.
+- **Camera to ASCII**: Real-time ASCII art from your webcam.
+- **Customizable Output**: Adjust settings like brightness, contrast, and colors.
+- **Save Your Art**: Download as text or image files.
 
+---
 
+## How It Works
 
-This project is perfect for anyone looking to explore the creative possibilities of ASCII art, whether for fun, art projects, or educational purposes.
+1. **Image to ASCII**
+   - Upload an image.
+   - The tool maps pixel brightness to ASCII characters.
+
+   ```javascript
+   let asciiChar = chars[floor(brightness * chars.length)];
+   text(asciiChar, x, y);
+   ```
+
+2. **Video to ASCII**
+   - Upload a video.
+   - Each frame is processed into ASCII art in real-time.
+
+   ```javascript
+   video.loadPixels();
+   for (let i = 0; i < video.pixels.length; i += 4) {
+       let brightness = calculateBrightness(video.pixels[i]);
+       asciiArt += chars[floor(brightness * chars.length)];
+   }
+   ```
+
+3. **Camera to ASCII**
+   - Activate your webcam.
+   - The live feed is converted into ASCII art.
+
+   ```javascript
+   capture.loadPixels();
+   // Similar processing as video frames
+   ```
+
+---
+
+## Quick Start
+
+1. Clone the repository.
+2. Open `index.html` in your browser.
+3. Choose a mode and start creating ASCII art!
+
+---
+
+## Contributing
+
+Fork the repository and submit pull requests. Contributions are welcome!
+
+---
+
+## License
+
+MIT License.
