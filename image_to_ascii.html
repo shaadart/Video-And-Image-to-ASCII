@@ -1,0 +1,218 @@
+<div class="ctrl-group"></div>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ASCII/Pixel Art Image Generator (p5.js)</title>
+  <script src="https://cdn.jsdelivr.net/npm/p5@1.5.0/lib/p5.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/ccapture.js@1.1.0/build/CCapture.all.min.js"></script>
+  <style>
+    body { display: flex; }
+    #controls { flex: 0 0 200px; padding: 10px; font-family: sans-serif; }
+    canvas { border: 1px solid #ccc; }
+    .ctrl-group { margin-bottom: 10px; }
+    .ctrl-group label { display: block; font-size: 0.9em; margin-bottom: 4px; }
+  </style>
+</head>
+<body>
+  <div id="controls">
+    <div class="ctrl-group">
+      <label for="imageFile">Load Image</label>
+      <input type="file" id="imageFile" accept="image/*">
+    </div>
+    <div class="ctrl-group">
+      <label for="charsetInput">Charset</label>
+      <input type="text" id="charsetInput" value="oo|         .    ">
+    </div>
+    <div class="ctrl-group">
+      <label for="depthSlider">Depth</label>
+      <input type="range" id="depthSlider" min="1" max="10" value="10">
+    </div>
+    <div class="ctrl-group">
+      <label for="scaleSlider">Scale (%)</label>
+      <input type="range" id="scaleSlider" min="10" max="200" value="100">
+    </div>
+    <div class="ctrl-group">
+      <label for="contrastSlider">Contrast (%)</label>
+      <input type="range" id="contrastSlider" min="0" max="300" value="100">
+    </div>
+    <div class="ctrl-group">
+      <label for="brightnessSlider">Brightness</label>
+      <input type="range" id="brightnessSlider" min="-100" max="100" value="0">
+    </div>
+    <div class="ctrl-group">
+      <label for="textColorPicker">Text Color</label>
+      <input type="color" id="textColorPicker" value="#ffbfff">
+    </div>
+    <div class="ctrl-group">
+      <label for="bgColorPicker">Background Color</label>
+      <input type="color" id="bgColorPicker" value="#003eb7">
+    </div>
+    <div class="ctrl-group">
+      <button id="exportPngButton">Export as PNG</button>
+    </div>
+    <div class="ctrl-group">
+      <button id="saveSettingsButton">Save Settings</button>
+      <button id="loadSettingsButton">Load Settings</button>
+    </div>
+    <div class="ctrl-group">
+      <button id="togglePixelMode">Toggle Pixel Mode</button>
+    </div>
+  </div>
+
+  <script>
+    let img;
+    let imgLoaded = false;
+    let canvasW = 800;
+    let canvasH = 600;
+    let capturer;
+    let isRecording = false;
+    let pixelMode = false;
+
+    function setup() {
+      let cnv = createCanvas(canvasW, canvasH);
+      cnv.parent(document.body);
+      pixelDensity(1);
+
+      const fileInput = select('#imageFile').elt;
+      fileInput.onchange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+          const url = URL.createObjectURL(file);
+          loadImage(url, (loadedImg) => {
+            img = loadedImg;
+            imgLoaded = true;
+
+            const aspectRatio = img.height / img.width;
+            resizeCanvas(canvasW , canvasH * aspectRatio);
+          });
+        }
+      };
+    }
+
+    document.getElementById('togglePixelMode').addEventListener('click', () => {
+      pixelMode = !pixelMode;
+    });
+
+    function draw() {
+      const bg = select('#bgColorPicker').elt.value;
+      background(bg);
+
+      if (!imgLoaded) return;
+
+      img.loadPixels();
+      if (img.pixels.length === 0) return;
+
+      const charset = select('#charsetInput').elt.value;
+      const depth = int(select('#depthSlider').elt.value);
+      const scalePct = select('#scaleSlider').elt.value / 100.0;
+      const contrast = select('#contrastSlider').elt.value / 100.0;
+      const brightness = select('#brightnessSlider').elt.value * 255 / 100;
+      const textCol = select('#textColorPicker').elt.value;
+
+      const baseFontSize = 12;
+      const fontSize = baseFontSize * scalePct;
+
+      textFont('monospace', fontSize);
+      fill(textCol);
+      noStroke();
+
+      const charW = textWidth('A');
+      const charH = textAscent() * 1.2;
+      const cols = floor(width / charW);
+      const rows = floor(height / charH);
+
+      const wStep = floor(img.width / cols);
+      const hStep = floor(img.height / rows);
+
+      for (let j = 0; j < rows; j++) {
+        for (let i = 0; i < cols; i++) {
+          const x = i * wStep;
+          const y = j * hStep;
+          const idx = 4 * (y * img.width + x);
+          let r = img.pixels[idx];
+          let g = img.pixels[idx + 1];
+          let b = img.pixels[idx + 2];
+
+          let gray = (r + g + b) / 3;
+          gray = constrain((gray - 128) * contrast + 128 + brightness, 0, 255);
+
+          if (pixelMode) {
+            let shades = [ document.getElementById('textColorPicker').value, document.getElementById('bgColorPicker').value ];
+            let shadeIndex = floor(map(gray, 0, 255, 0, shades.length - 1));
+            fill(shades[shadeIndex]);
+            rect(i * charW, j * charH, charH, charH);
+          } else {
+            const levs = charset.substring(0, depth);
+            const pos = floor(map(gray, 0, 255, levs.length - 1, 0));
+            const c = levs.charAt(pos);
+            text(c, i * charW, j * charH);
+          }
+        }
+      }
+    }
+
+    // Reset button
+    document.getElementById('resetButton').addEventListener('click', () => {
+      document.getElementById('charsetInput').value = 'oo|         .    ';
+      document.getElementById('depthSlider').value = 10;
+      document.getElementById('scaleSlider').value = 100;
+      document.getElementById('contrastSlider').value = 100;
+      document.getElementById('brightnessSlider').value = 0;
+      document.getElementById('textColorPicker').value = '#95b6f4';
+      document.getElementById('bgColorPicker').value = '#003eb7';
+      background('#000000');
+    });
+
+    // Save settings
+    document.getElementById('saveSettingsButton').addEventListener('click', () => {
+      const settings = {
+        charset: document.getElementById('charsetInput').value,
+        depth: document.getElementById('depthSlider').value,
+        scale: document.getElementById('scaleSlider').value,
+        contrast: document.getElementById('contrastSlider').value,
+        brightness: document.getElementById('brightnessSlider').value,
+        textColor: document.getElementById('textColorPicker').value,
+        bgColor: document.getElementById('bgColorPicker').value
+      };
+
+      const blob = new Blob([JSON.stringify(settings, null, 2)], { type: 'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'settings.json';
+      a.click();
+    });
+
+    // Load settings
+    document.getElementById('loadSettingsButton').addEventListener('click', () => {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = 'application/json';
+      input.onchange = (event) => {
+        const file = event.target.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            const settings = JSON.parse(e.target.result);
+            document.getElementById('charsetInput').value = settings.charset || '';
+            document.getElementById('depthSlider').value = settings.depth || 10;
+            document.getElementById('scaleSlider').value = settings.scale || 100;
+            document.getElementById('contrastSlider').value = settings.contrast || 100;
+            document.getElementById('brightnessSlider').value = settings.brightness || 0;
+            document.getElementById('textColorPicker').value = settings.textColor || '#ffffff';
+            document.getElementById('bgColorPicker').value = settings.bgColor || '#000000';
+          };
+          reader.readAsText(file);
+        }
+      };
+      input.click();
+    });
+
+    // Add export as PNG functionality
+    document.getElementById('exportPngButton').addEventListener('click', () => {
+      saveCanvas('ascii_art', 'png');
+    });
+  </script>
+</body>
+</html>

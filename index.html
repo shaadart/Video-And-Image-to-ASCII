@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ASCII Art Generator</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.6.0/p5.js"></script>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <h1>ASCII Art Generator</h1>
+    <div class="options">
+      <button id="imageToAscii">Image to ASCII</button>
+      <button id="cameraToAscii">Camera to ASCII</button>
+      <button id="videoToAscii">Video to ASCII</button>
+      <button id="originalImageToAscii">Original Image to ASCII</button>
+      <button id="originalVideoToAscii">Original Video to ASCII</button>
+      <button id="squarePixeledVideo">Square Pixeled Video</button>
+      <button id="vectorPath">Vector Path</button>
+    </div>
+  </div>
+  <script>
+    document.getElementById('imageToAscii').addEventListener('click', () => {
+      window.location.href = 'image_to_ascii.html';
+    });
+    document.getElementById('cameraToAscii').addEventListener('click', () => {
+      window.location.href = 'camera_to_ascii.html';
+    });
+    document.getElementById('videoToAscii').addEventListener('click', () => {
+      window.location.href = 'video_to_ascii.html';
+    });
+    document.getElementById('originalImageToAscii').addEventListener('click', () => {
+      window.location.href = 'original_image_to_ascii.html';
+    });
+    document.getElementById('originalVideoToAscii').addEventListener('click', () => {
+      window.location.href = 'original_video_to_ascii.html';
+    });
+    document.getElementById('squarePixeledVideo').addEventListener('click', () => {
+      window.location.href = 'square_pixeled_video.html';
+    });
+    document.getElementById('vectorPath').addEventListener('click', () => {
+      window.location.href = 'vector_path.html';
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Colorful ASCII Art Video Generator</title>
+  <script src="https://cdn.jsdelivr.net/npm/p5@1.5.0/lib/p5.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/ccapture.js@1.1.0/build/CCapture.all.min.js"></script>
+  <style>
+    body { display: flex; font-family: sans-serif; }
+    #controls { flex: 0 0 200px; padding: 10px; }
+    canvas { border: 1px solid #ccc; }
+    .ctrl-group { margin-bottom: 10px; }
+    .ctrl-group label { display: block; font-size: 0.9em; margin-bottom: 4px; }
+  </style>
+</head>
+<body>
+  <div id="controls">
+    <div class="ctrl-group">
+      <label for="videoFile">Load Video</label>
+      <input type="file" id="videoFile" accept="video/*">
+    </div>
+    <div class="ctrl-group">
+      <label for="charsetInput">Charset</label>
+      <input type="text" id="charsetInput" value="$@B%8&WM#*">
+    </div>
+    <div class="ctrl-group">
+      <label for="depthSlider">Depth</label>
+      <input type="range" id="depthSlider" min="1" max="10" value="10">
+    </div>
+    <div class="ctrl-group">
+      <label for="scaleSlider">Scale (%)</label>
+      <input type="range" id="scaleSlider" min="10" max="200" value="100">
+    </div>
+    <div class="ctrl-group">
+      <label for="contrastSlider">Contrast (%)</label>
+      <input type="range" id="contrastSlider" min="0" max="300" value="100">
+    </div>
+    <div class="ctrl-group">
+      <label for="brightnessSlider">Brightness</label>
+      <input type="range" id="brightnessSlider" min="-100" max="100" value="0">
+    </div>
+    <div class="ctrl-group">
+      <button id="exportButton">Start Recording</button>
+    </div>
+  </div>
+
+  <script>
+    let video;
+    let playing = false;
+    let canvasW = 1000;
+    let canvasH = 600;
+    let capturer;
+    let isRecording = false;
+
+    function setup() {
+      let cnv = createCanvas(canvasW, canvasH);
+      cnv.parent(document.body);
+      pixelDensity(1);
+      background(0);
+
+      document.getElementById('videoFile').onchange = (e) => {
+        if (video) video.remove();
+        const file = e.target.files[0];
+        if (file) {
+          const url = URL.createObjectURL(file);
+          video = createVideo(url, () => {
+            video.loop();
+            video.hide();
+            playing = true;
+
+            const aspectRatio = video.height / video.width;
+            resizeCanvas(canvasW, canvasW * aspectRatio);
+          });
+        }
+      };
+    }
+
+    document.getElementById('exportButton').addEventListener('click', () => {
+      if (!isRecording) {
+        capturer = new CCapture({ format: 'webm' });
+        capturer.start();
+        isRecording = true;
+        exportButton.textContent = 'Stop Recording';
+      } else {
+        capturer.stop();
+        capturer.save();
+        isRecording = false;
+        exportButton.textContent = 'Start Recording';
+      }
+    });
+
+    function draw() {
+      background(0);
+
+      if (!playing || !video || !video.loadedmetadata) return;
+
+      video.loadPixels();
+      if (video.pixels.length === 0) return;
+
+      const charset = select('#charsetInput').elt.value;
+      const depth = int(select('#depthSlider').elt.value);
+      const scalePct = select('#scaleSlider').elt.value / 100.0;
+      const contrast = select('#contrastSlider').elt.value / 100.0;
+      const brightness = select('#brightnessSlider').elt.value * 255 / 100;
+
+      const baseFontSize = 12;
+      const fontSize = baseFontSize * scalePct;
+
+      textFont('monospace', fontSize);
+      noStroke();
+
+      const charW = textWidth('A');
+      const charH = textAscent() * 1.2;
+      const cols = floor(width / charW);
+      const rows = floor(height / charH);
+
+      const wStep = floor(video.width / cols);
+      const hStep = floor(video.height / rows);
+
+      for (let j = 0; j < rows; j++) {
+        for (let i = 0; i < cols; i++) {
+          const x = i * wStep;
+          const y = j * hStep;
+          const idx = 4 * (y * video.width + x);
+
+          let r = video.pixels[idx];
+          let g = video.pixels[idx + 1];
+          let b = video.pixels[idx + 2];
+
+            
+          let gray = (r + g + b) / 3;
+          gray = constrain((gray - 128) * contrast + 128 + brightness, 0, 255);
+
+
+          const levs = charset.substring(0, depth);
+          const pos = floor(map(gray, 0, 255, levs.length - 1, 0));
+          const c = levs.charAt(pos);
+
+          // set character color based on original pixel
+          fill(r, g, b);
+          text(c, i * charW, j * charH);
+        }
+      }
+
+      if (isRecording) {
+        capturer.capture(document.querySelector('canvas'));
+      }
+    }
+  </script>
+</body>
+</html>

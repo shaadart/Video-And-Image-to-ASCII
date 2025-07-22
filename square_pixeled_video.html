@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Video to Pixel Block Art</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script src="https://cdn.jsdelivr.net/npm/p5@1.5.0/lib/p5.min.js"></script>
+  <style>
+    body {
+      margin: 0;
+      background-color: black;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      overflow: hidden;
+    }
+    canvas {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <script>
+    let video;
+    let step = 10;
+
+    function setup() {
+      createCanvas(640, 480);
+      // You can use a local file here or provide a file input to load custom videos
+      video = createVideo(['your_video.mp4'], () => video.loop());
+      video.hide();
+      noStroke();
+    }
+
+    function draw() {
+      background(0);
+      video.loadPixels();
+
+      for (let y = 0; y < video.height; y += step) {
+        for (let x = 0; x < video.width; x += step) {
+          let index = 4 * (y * video.width + x);
+          let r = video.pixels[index];
+          let g = video.pixels[index + 1];
+          
+          let b = video.pixels[index + 2];
+
+          fill(r, g, b);
+          rect(x, y, step - 1, step - 1, 3); // 3 = rounded corner radius
+        }
+      }
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Camera to ASCII</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.6.0/p5.js"></script>
+  <script src="camera_to_ascii.js"></script>
+</head>
+<body>
+  <div class="container">
+    <h1>Camera to ASCII Art</h1>
+    <p>Convert your live camera feed into ASCII art in real-time!</p>
+    <button id="start">Start</button>
+    <button id="stop">Stop</button>
+  </div>
+  <script>
+    document.getElementById('start').addEventListener('click', () => {
+      alert('Starting ASCII conversion!');
+    });
+    document.getElementById('stop').addEventListener('click', () => {
+      alert('Stopping ASCII conversion!');
+    });
+  </script>
+</body>
+</html>

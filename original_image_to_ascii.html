@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Image to ASCII Art Generator</title>
+  <script src="https://cdn.jsdelivr.net/npm/p5@1.5.0/lib/p5.min.js"></script>
+  <style>
+    body { display: flex; font-family: sans-serif; }
+    #controls { flex: 0 0 200px; padding: 10px; }
+    canvas { border: 1px solid #ccc; }
+    .ctrl-group { margin-bottom: 10px; }
+    .ctrl-group label { display: block; font-size: 0.9em; margin-bottom: 4px; }
+  </style>
+</head>
+<body>
+  <div id="controls">
+    <div class="ctrl-group">
+      <label for="imageFile">Load Image</label>
+      <input type="file" id="imageFile" accept="image/*">
+    </div>
+    <div class="ctrl-group">
+      <label for="charsetInput">Charset</label>
+      <input type="text" id="charsetInput" value="$@B%8&WM#*">
+    </div>
+    <div class="ctrl-group">
+      <label for="depthSlider">Depth</label>
+      <input type="range" id="depthSlider" min="1" max="10" value="10">
+    </div>
+    <div class="ctrl-group">
+      <label for="scaleSlider">Scale (%)</label>
+      <input type="range" id="scaleSlider" min="10" max="200" value="100">
+    </div>
+    <div class="ctrl-group">
+      <label for="contrastSlider">Contrast (%)</label>
+      <input type="range" id="contrastSlider" min="0" max="300" value="100">
+    </div>
+    <div class="ctrl-group">
+      <label for="brightnessSlider">Brightness</label>
+      <input type="range" id="brightnessSlider" min="-100" max="100" value="0">
+    </div>
+    <div class="ctrl-group">
+      <label for="saturationSlider">Saturation (%)</label>
+      <input type="range" id="saturationSlider" min="0" max="300" value="100">
+    </div>
+    <div class="ctrl-group">
+      <label for="bgColorPicker">Background Color</label>
+      <input type="color" id="bgColorPicker" value="#1516ff">
+    </div>
+    <div class="ctrl-group">
+      <label for="tintColorPicker">Tint Color</label>
+      <input type="color" id="tintColorPicker" value="#ffffff">
+    </div>
+    <div class="ctrl-group">
+      <button id="downloadButton">Download ASCII Image</button>
+    </div>
+    <div class="ctrl-group">
+      <button id="negativeToggle">Toggle Negative</button>
+    </div>
+  </div>
+
+  <script>
+    let img;
+    let canvasW = 800;
+    let canvasH = 600;
+    let negativeMode = false;
+
+    function setup() {
+      let cnv = createCanvas(canvasW, canvasH);
+      cnv.parent(document.body);
+      pixelDensity(1);
+      background(0);
+      noLoop(); // only redraw when needed
+
+      document.getElementById('imageFile').onchange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+          const url = URL.createObjectURL(file);
+          loadImage(url, (loadedImg) => {
+            img = loadedImg;
+            const aspect = img.height / img.width;
+            resizeCanvas(canvasW, canvasW * aspect);
+            redraw();
+          });
+        }
+      };
+
+      // Trigger redraw when any control changes
+      ['charsetInput', 'depthSlider', 'scaleSlider', 'contrastSlider', 'brightnessSlider', 'saturationSlider', 'bgColorPicker']
+        .forEach(id => {
+          document.getElementById(id).addEventListener('input', () => {
+            redraw();
+          });
+        });
+
+      document.getElementById('downloadButton').onclick = () => {
+        saveCanvas('ascii-image', 'png');
+      };
+
+      document.getElementById('negativeToggle').addEventListener('click', () => {
+        negativeMode = !negativeMode;
+        redraw();
+      });
+    }
+
+    function adjustSaturation(r, g, b, saturation) {
+  // Convert to HSL
+  r /= 255; g /= 255; b /= 255;
+  let max = Math.max(r, g, b), min = Math.min(r, g, b);
+  let l = (max + min) / 2;
+
+  if (max === min) {
+    return [r * 255, g * 255, b * 255]; // grayscale, no saturation effect
+  }
+
+  let d = max - min;
+  let s = d / (1 - Math.abs(2 * l - 1));
+  s = constrain(s * saturation, 0, 1);
+
+  // Convert back to RGB approximately
+  let avg = (r + g + b) / 3;
+  r = avg + (r - avg) * s;
+  g = avg + (g - avg) * s;
+  b = avg + (b - avg) * s;
+
+  return [constrain(r * 255, 0, 255), constrain(g * 255, 0, 255), constrain(b * 255, 0, 255)];
+}
+
+    function applyNegative(r, g, b) {
+      if (negativeMode) {
+        return [255 - r, 255 - g, 255 - b];
+      }
+      return [r, g, b];
+    }
+
+    function draw() {
+      if (!img) return;
+      const bgCol = document.getElementById('bgColorPicker').value;
+      background(bgCol);
+      img.loadPixels();
+      if (img.pixels.length === 0) return;
+
+      const charset = document.getElementById('charsetInput').value;
+      const depth = parseInt(document.getElementById('depthSlider').value);
+      const scalePct = parseFloat(document.getElementById('scaleSlider').value) / 100.0;
+      const contrast = parseFloat(document.getElementById('contrastSlider').value) / 100.0;
+      const brightness = parseFloat(document.getElementById('brightnessSlider').value) * 255 / 100;
+      const saturation = parseFloat(document.getElementById('saturationSlider').value) / 100.0;
+      const tintColor = document.getElementById('tintColorPicker').value;
+
+      const baseFontSize = 10;
+      const fontSize = baseFontSize * scalePct;
+      textFont('monospace', fontSize);
+      noStroke();
+
+      const charW = textWidth('A');
+      const charH = textAscent() * 1.2;
+      const cols = floor(width / charW);
+      const rows = floor(height / charH);
+
+      const wStep = floor(img.width / cols);
+      const hStep = floor(img.height / rows);
+
+      for (let j = 0; j < rows; j++) {
+        for (let i = 0; i < cols; i++) {
+          const x = i * wStep;
+          const y = j * hStep;
+          const idx = 4 * (y * img.width + x);
+
+          let r = img.pixels[idx];
+          let g = img.pixels[idx + 1];
+          let b = img.pixels[idx + 2];
+
+          const [sr, sg, sb] = adjustSaturation(r, g, b, saturation);
+          const [nr, ng, nb] = applyNegative(sr, sg, sb);
+
+          // Use original RGB for brightness/contrast-adjusted grayscale calculation
+          let gray = (r + g + b) / 3;
+          gray = constrain((gray - 128) * contrast + 128 + brightness, 0, 255);
+
+          const levs = charset.substring(0, depth);
+          const pos = floor(map(gray, 0, 255, levs.length - 1, 0));
+          const c = levs.charAt(pos);
+
+          fill(nr, ng, nb); // Apply negative and tint color
+          text(c, i * charW, j * charH);
+        }
+      }
+    }
+  </script>
+</body>
+</html>
