@@ -3,24 +3,19 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Camera to ASCII</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.6.0/p5.js"></script>
-  <script src="camera_to_ascii.js"></script>
+  <meta name="theme-color" content="#101010">
+  <meta name="description" content="Convert images, videos, and your camera to ASCII. Adjust characters and colors. Export PNG, text, or WebM. Files stay in your browser.">
+  <title>Camera to ASCII — Death of Pixels</title>
+  <link rel="icon" href="favicon.ico" type="image/x-icon" sizes="16x16 32x32 48x48 64x64 128x128 256x256">
+  <link rel="stylesheet" href="style.css">
+  <script src="vendor/p5.min.js" defer></script>
+  <script src="ascii-engine.js" defer></script>
+  <script src="image_to_ascii.js" defer></script>
+  <script src="camera_to_ascii.js" defer></script>
+  <script src="studio.js" defer></script>
 </head>
-<body>
-  <div class="container">
-    <h1>Camera to ASCII Art</h1>
-    <p>Convert your live camera feed into ASCII art in real-time!</p>
-    <button id="start">Start</button>
-    <button id="stop">Stop</button>
-  </div>
-  <script>
-    document.getElementById('start').addEventListener('click', () => {
-      alert('Starting ASCII conversion!');
-    });
-    document.getElementById('stop').addEventListener('click', () => {
-      alert('Stopping ASCII conversion!');
-    });
-  </script>
+<body data-mode="camera">
+  <div id="app"></div>
+  <noscript>Enable JavaScript to use the ASCII converter.</noscript>
 </body>
 </html>

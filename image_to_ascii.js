@@ -1,240 +1,63 @@
-let img, aspectRatio;
-let previewCanvas, previewCtx;
-let size = 10; 
-let asciiChar = "$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/()1{}[]?-_+~<>i!lI;:,^`'. "
-// let asciiChar = " .:-=+*#%@";
-let inputFile;
-
-
-  // grab controls
-  const cwSlider = document.getElementById("canvasWidth");
-  const cwInput  = document.getElementById("canvasWidthInput");
-  const pxSlider = document.getElementById("pixelSize");
-  const useCustom = document.getElementById("useCustomChars");
-  const customChars = document.getElementById("customChars");
-  const contrast = document.getElementById("contrast");
-  const saturation = document.getElementById("saturation");
-  const brightness = document.getElementById("brightness");
-  const fileInput = document.getElementById("fileInput");
-  const asciiOut  = document.getElementById("asciiOutput");
-  const bgcolor = document.getElementById("bgcolor");
-  const asciiColor = document.getElementById("asciiColor");
-  const downloadBtn = document.getElementById("downloadBtn");
-  const resetBtn = document.getElementById("resetBtn");
-
-
-  previewCanvas = document.getElementById("previewCanvas");
-  previewCtx    = previewCanvas.getContext("2d");
-
-
-  cwSlider.addEventListener('input', function(){
-    const value = cwSlider.value;
-    cwSlider.textContent = value; 
-    console.log(value); 
-    resizeCanvas(value, value);
-    img.resize(value/4, 0);
-
-  });
-
-  pxSlider.addEventListener('input', function(){
-    const value = pxSlider.value;
-    pxSlider.textContent = value; 
-    size = value;
-    textSize(size*(img.width/100)); // Set p5.js text size
-    draw(); 
-    
-  }
-  );
-
-  useCustom.addEventListener('change', function() {
-    if (useCustom.checked) {
-      customChars.disabled = false;
-      asciiChar = customChars.value;
-    } else {
-      customChars.disabled = true;
-      asciiChar = "$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\|()1{}[]?-_+~<>i!lI;:,^`'. ";
+/* Built-in specimens are drawn locally, then passed through the real converter. */
+(function () {
+  'use strict';
+  window.AsciiSpecimens = {
+    create(kind = 'eye') {
+      const canvas = document.createElement('canvas');
+      canvas.width = 1200;
+      canvas.height = 820;
+      const context = canvas.getContext('2d');
+      const data = context.createImageData(canvas.width, canvas.height);
+      for (let y = 0; y < canvas.height; y++) {
+        for (let x = 0; x < canvas.width; x++) {
+          const u = (x - 600) / 430;
+          const v = (y - 410) / 290;
+          const noise = (Math.sin(x * 12.9898 + y * 78.233) * 43758.5453) % 1;
+          let shade;
+          if (kind === 'orb') {
+            const radius = Math.hypot(u, v);
+            const sphere = Math.sqrt(Math.max(0, 1 - radius * radius));
+            const light = Math.max(0, (-u * 0.55 - v * 0.45 + sphere * 0.75));
+            shade = radius < 1 ? 22 + light * 180 + Math.sin(v * 37 + u * 14 + sphere * 4) * 15 : 4;
+            shade += 18 * Math.exp(-Math.pow((radius - 1.02) * 25, 2));
+          } else if (kind === 'waves') {
+            const ripple = Math.sin(Math.hypot(u * 1.4, v + 0.15) * 23 + Math.sin(u * 4) * 2);
+            const envelope = Math.exp(-(u * u * 0.4 + v * v * 0.8));
+            shade = 6 + Math.pow((ripple + 1) / 2, 3) * envelope * 220;
+          } else {
+            const curve = Math.pow(Math.max(0, 1 - u * u), 0.72);
+            const opening = curve * 0.53;
+            const inside = Math.abs(v + u * 0.05) < opening && Math.abs(u) < 1;
+            const r = Math.hypot(u * 1.04, v);
+            const angle = Math.atan2(v, u);
+            const lidDistance = Math.abs(Math.abs(v + u * 0.05) - opening);
+            shade = 5 + 17 * Math.exp(-(u * u + v * v) * 1.5);
+            shade += 44 * Math.exp(-Math.pow((v + curve * 0.68 + 0.03) * 19, 2)) * curve;
+            shade += 27 * Math.exp(-Math.pow((v - curve * 0.7 - 0.08) * 15, 2)) * curve;
+            if (inside) {
+              shade = 150 - 68 * Math.abs(u) - 48 * Math.abs(v) / Math.max(0.01, opening);
+              if (r < 0.48) {
+                const fibers = Math.sin(angle * 87 + Math.sin(r * 46) * 2) * Math.sin(angle * 31 - r * 53);
+                shade = 75 + fibers * 45 + 58 * Math.sin(r / 0.48 * Math.PI);
+                shade *= 0.5 + 0.5 * Math.min(1, (0.48 - r) * 22);
+              }
+              if (r < 0.205) shade = 3;
+              if (Math.hypot(u + 0.11, v + 0.16) < 0.064) shade = 250;
+              if (Math.hypot(u - 0.17, v - 0.12) < 0.025) shade = 185;
+              shade *= 0.6 + 0.4 * Math.min(1, lidDistance * 25);
+            }
+            if (Math.abs(u) < 1.1) shade += 42 * Math.exp(-Math.pow(lidDistance * 45, 2));
+          }
+          const offset = (y * canvas.width + x) * 4;
+          const light = Math.max(0, Math.min(255, shade + noise * 13));
+          data.data[offset] = light;
+          data.data[offset + 1] = light * 0.96;
+          data.data[offset + 2] = light * 0.85;
+          data.data[offset + 3] = 255;
+        }
+      }
+      context.putImageData(data, 0, 0);
+      return canvas;
     }
-    draw(); 
-  });
-
-  customChars.addEventListener('input', function() {
-    asciiChar = customChars.value;
-    draw(); 
-  });
-
-  contrast.addEventListener('input', function() {
-    const value = contrast.value;
-    contrast.textContent = value; 
-    img.filter(CONTRAST, value);
-    draw(); 
-  }
-  );
-
-  brightness.addEventListener('input', function() {
-    const value = brightness.value;
-    brightness.textContent = value; 
-    img.loadPixels();
-    for (let i = 0; i < img.pixels.length; i += 4) {
-      img.pixels[i] = img.pixels[i] * value;     // Red
-      img.pixels[i + 1] = img.pixels[i + 1] * value; // Green
-      img.pixels[i + 2] = img.pixels[i + 2] * value; // Blue
-    }
-    img.updatePixels();
-    draw();  
-  });
-
-  // Update the color event listener
-  asciiColor.addEventListener('input', function() {
-    const colorInput = asciiColor.value;
-    const r = parseInt(colorInput.substr(1,2), 16);
-    const g = parseInt(colorInput.substr(3,2), 16);
-    const b = parseInt(colorInput.substr(5,2), 16);
-    const a = parseInt(colorInput.substr(7,2), 16) || 255; // Default to 255 if not provided
-    // Set the color for the ASCII characters
-    fill(r, g, b, a); // Set the fill color for the ASCII characters
-    draw();  // This will use the new color value
-  });
-
-downloadBtn.addEventListener('click', function() {
-  const canvas = document.createElement('canvas');
-  canvas.width = img.width * size;
-  canvas.height = img.height * size;
-  const ctx = canvas.getContext('2d');
-  
-  // Draw the ASCII art on the new canvas
-  for (let i=0; i<img.width; i++) {
-    for (let j=0; j<img.height; j++) {
-      let pixelIndex = (i + j*img.width) * 4;
-      let r = img.pixels[pixelIndex + 0];
-      let g = img.pixels[pixelIndex + 1];
-      let b = img.pixels[pixelIndex + 2];
-      let a = img.pixels[pixelIndex + 3];
-      
-      let bright = (r + g + b + a) / 3;
-      let tIndex = floor(map(bright, 0, 255, 0, asciiChar.length));
-      
-      let x = i*size + size/2;
-      let y = j*size + size/2;
-      let t = asciiChar.charAt(tIndex);
-      ctx.font = `${size}px monospace`;
-      ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${a})`;
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText(t, x, y);
-    }
-  }
-  
-  // Create a download link for the ASCII art
-  const link = document.createElement('a');
-  link.download = 'ascii_art.png';
-  link.href = canvas.toDataURL();
-  link.click();
-
-});
-
-// Add reset button functionality 
-resetBtn.addEventListener('click', function() {
-  // Reset all controls to default values
-  cwSlider.value = 800;
-  cwInput.value = 800;
-  pxSlider.value = 8;
-  size = 8;
-  contrast.value = 1;
-  saturation.value = 1;
-  brightness.value = 0;
-  bgcolor.value = "#000000";
-  asciiColor.value = "#00ff00";
-  useCustom.checked = false;
-  customChars.disabled = true;
-  customChars.value = "";
-  asciiChar = "$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\|()1{}[]?-_+~<>i!lI;:,^`'. ";
-  
-  // If an image is loaded, reset and redraw
-  if (img) {
-    // Reset image to original size without filters
-    img = loadImage(img.canvas.toDataURL(), () => {
-      img.resize(100, 0);
-      size = width / img.width;
-      draw();
-    });
-  }
-});
-
-function preload() {
-  inputFile = createFileInput(handleFile);
-  inputFile.position(0, 0);
-}
-
-function handleFile(file) {
-  if (file.type === 'image') {
-    img = loadImage(file.data, () => {
-      img.resize(100, 0);
-      size = width / img.width;
-    });
-  } else {
-    console.error('Not an image file!');
-  }
-}
-
-function setup() {
-  createCanvas(400, 400);
-  background(240);
-  textSize(16);
-  
-  textAlign(CENTER, CENTER);
-  text('Upload an image to convert to ASCII', width / 2, height / 2);
-}
-
-// Modify the draw function to use the selected color
-function draw() {
-  if (!img) return;
-  
-  // Convert hex color value to RGB
-  const colorInput = bgcolor.value;
-  const r = parseInt(colorInput.substr(1,2), 16);
-  const g = parseInt(colorInput.substr(3,2), 16);
-  const b = parseInt(colorInput.substr(5,2), 16);
-  // const a = parseInt(colorInput.substr(7,2), 16) || 0; // Default to 255 if not provided
-  noStroke();
-  // Set background using the color picker's RGB values
-  background(r, g, b);
-  
-  /* ---- Using pixels ---- */
-  img.loadPixels();
-  for (let i=0; i<img.width; i++) {
-    for (let j=0; j<img.height; j++) {
-      let pixelIndex = (i + j*img.width) * 4;
-      let r = img.pixels[pixelIndex + 0];
-      let g = img.pixels[pixelIndex + 1];
-      let b = img.pixels[pixelIndex + 2];
-      let a = img.pixels[pixelIndex + 3];
-      
-      // let bright = brightness(color(r, g, b))
-      let bright = (r + g + b + a) / 3;
-      let tIndex = floor(map(bright, 0, 255, 0, asciiChar.length));
-      
-      let x = i*size + size/2;
-      let y = j*size + size/2;
-      let t = asciiChar.charAt(tIndex);
-      textSize(size);
-      textAlign(CENTER, CENTER);
-      text(t, x, y);
-    }
-  }
-}
-/* ---- Using get() ---- */
-//   for (let i=0; i<img.width; i++) {
-//     for (let j=0; j<img.height; j++) {
-//       let pixelVal = img.get(i, j);
-//       let c = brightness(pixelVal);
-//       let tIndex = floor(map(c, 0, 100, 0 ,asciiChar.length));
-      
-//       let x = i*size + size/2;
-//       let y = j*size + size/2;
-//       let t = asciiChar.charAt(tIndex);
-//       textSize(size);
-//       textAlign(CENTER, CENTER);
-//       text(t, x, y);
-      
-//     }
-//   }
+  };
+})();

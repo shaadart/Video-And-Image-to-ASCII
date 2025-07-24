@@ -1,42 +1,25 @@
-
-
-let asciiChar = "$@B%8&WM#*oahkbdpqwmZO0QLCJUYXzcvunxrjft/\|()1{}[]?-_+~<>i!lI;:,^`'. "
-// let asciiChar = " .:-=+*#%@";
-
-let video; let vidw = 64; let vidh = 48; let scl = 10;
-let w, h;
-
-function setup() {
-  createCanvas(vidw * scl, vidh * scl);
-  video = createCapture(VIDEO);
-  video.size(vidw, vidh);
-  w = width / video.width;
-  h = height / video.height;
-}
-
-function draw() {
-  background(255);
-  video.loadPixels();
-  
-  /* ---- Using pixels ---- */
-  for (let i=0; i<video.width; i++) {
-    for (let j=0; j<video.height; j++) {
-      let pixelIndex = (i + j*video.width) * 4;
-      let r = video.pixels[pixelIndex + 0];
-      let g = video.pixels[pixelIndex + 1];
-      let b = video.pixels[pixelIndex + 2];
-      
-      // let bright = brightness(color(r, g, b))
-      let bright = (r + g + b) / 3;
-      let tIndex = floor(map(bright, 0, 255, 0, asciiChar.length));
-      
-      let x = i*w + w/2;
-      let y = j*h + h/2;
-      let t = asciiChar.charAt(tIndex);
-      stroke(255);
-      textSize(w);
-      textAlign(CENTER, CENTER);
-      text(t, x, y);
-    }
-  }
-}
+/* A camera is requested only by an explicit user action. */
+(function () {
+  'use strict';
+  window.AsciiCamera = {
+    async open() {
+      if (!window.isSecureContext || !navigator.mediaDevices?.getUserMedia) {
+        throw new Error('Camera access needs HTTPS or localhost. Images and videos still work here.');
+      }
+      try {
+        return await navigator.mediaDevices.getUserMedia({
+          video: { width: { ideal: 1280 }, height: { ideal: 720 }, facingMode: 'user' }, audio: false
+        });
+      } catch (error) {
+        const messages = {
+          NotAllowedError: 'Camera permission was declined. Allow access in your browser and try again.',
+          NotFoundError: 'No camera was found. Connect one, or try an image or video.',
+          NotReadableError: 'The camera is busy. Close the other app using it and try again.',
+          OverconstrainedError: 'This camera could not start. Try another camera or upload a file.'
+        };
+        throw new Error(messages[error.name] || 'The camera could not start. Check its connection and try again.');
+      }
+    },
+    stop(stream) { stream?.getTracks().forEach(track => track.stop()); }
+  };
+})();
