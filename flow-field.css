@@ -2,6 +2,7 @@
   padding-bottom:32px
 }
 .flow-studio {
+  border:1px solid var(--border);
   overflow:hidden;
   background:var(--well)
 }

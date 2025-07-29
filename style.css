@@ -15,6 +15,8 @@
   --muted: #b0b0b0;
   --dim: #999999;
   --accent: #eeeeee;
+  --border: #353535;
+  --border-active: #747474;
   --mono: ui-monospace, 'SFMono-Regular', Consolas, 'Liberation Mono', monospace;
   --sans: Arial, sans-serif;
 }
@@ -104,6 +106,7 @@ h1 em, .site-footer em, .about-dialog em { font: inherit; color: inherit; }
   font-size: 11px;
   font-weight: 400;
   line-height: 1.5;
+  border: 1px solid var(--border);
 }
 .button:hover { background: #2a2a2a; }
 
@@ -141,6 +144,7 @@ h1 em, .site-footer em, .about-dialog em { font: inherit; color: inherit; }
   min-width: 230px;
   padding: 5px;
   background: #1d1d1d;
+  border: 1px solid var(--border);
 }
 .export-options button {
   width: 100%;
@@ -174,6 +178,7 @@ h1 em, .site-footer em, .about-dialog em { font: inherit; color: inherit; }
   justify-content: center;
   width: 100%;
   padding: 13px 8px;
+  border: 1px dashed var(--border);
 }
 .upload-zone:hover { background: #1c1c1c; }
 .upload-icon { margin-bottom: 6px; }
@@ -217,6 +222,7 @@ select, input[type=text] {
   color: var(--ink);
   background: #1a1a1a;
   font-size: 12px;
+  border: 1px solid var(--border);
 }
 select { appearance: auto; }
 .character-preview {
@@ -300,6 +306,7 @@ input[type=color]::-moz-color-swatch { border: 0; }
   min-height: 330px;
   flex: 1;
   background: var(--well);
+  border: 1px solid var(--border);
 }
 .canvas-mount {
   position: absolute;
@@ -345,8 +352,10 @@ input[type=color]::-moz-color-swatch { border: 0; }
   overflow: hidden;
   color: var(--preset-ink);
   background: var(--preset-paper);
+  border: 1px solid transparent;
 }
 .preset-art > span { white-space: nowrap; font: 8px/1.2 var(--mono); }
+.preset.active .preset-art { border-color: var(--border-active); }
 
 .preset-name { display: flex; justify-content: space-between; gap: 4px; margin-top: 6px; color: var(--muted); font-size: 10px; }
 .preset.active .preset-name { color: #fff; text-decoration: underline; text-underline-offset: 3px; }

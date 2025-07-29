@@ -1,9 +1,10 @@
 # Death of Pixels
 
-ASCII from images, video, and your camera.
+To make ASCII art with a few clear controls and keep the source files on your device.
 
-Choose a file. Change the characters, light, and color. Export the result.
-Your files stay in your browser.
+Start with an image, a video, or your camera. Adjust the characters, light, and color. Save the result. Everything runs in your browser.
+
+![The ASCII studio showing the built-in eye sample, controls, and presets](docs/media/studio.png)
 
 ## Run
 
@@ -11,37 +12,43 @@ Your files stay in your browser.
 python -m http.server 4173 --bind 127.0.0.1
 ```
 
-Open [localhost:4173](http://localhost:4173). No install. No build step.
-You can also open `index.html` directly for images and video. Camera access requires localhost or HTTPS.
+Open [localhost:4173](http://localhost:4173).
+
+You can also open `index.html` directly for images and video. The camera needs localhost or HTTPS.
 
 ## Use
 
-- Drop an image or video, start the camera, or try a sample.
-- Adjust detail, contrast, brightness, and colors. Choose a preset or write your own character set.
-- Compare the original. Switch to source colors or pixel blocks under **Advanced**.
-- Export PNG or text, copy ASCII, or record a silent WebM. Save settings to reuse them.
+1. Drop in a file, start the camera, or choose a sample.
+2. Pick a preset or adjust detail, contrast, brightness, and colors. Use **Original** to compare.
+3. Export a PNG, copy or download the text, or record a silent WebM. Save settings to use them again.
 
-Images: up to 40 MB. Video: up to 500 MB. Recordings: up to five minutes.
-GIFs render as still images. Video decoding and recording depend on browser support.
+The demo below shows preset changes, detail adjustment, comparison, and PNG export.
 
-The [flow field](vector_path.html) is a separate particle sketch. Pause it, change its color, or save a frame.
+![A demo of the working studio: presets, detail, original comparison, and export](docs/media/demo.gif)
 
-## Keys
+[Watch the MP4](docs/media/demo.mp4)
 
-| Key | Action |
-| --- | --- |
-| `O` | Toggle the original |
-| `F` | Expand the preview |
-| `Esc` | Close the expanded preview |
-| `Space` | Play or pause video |
+**Shortcuts:** `O` original · `F` expand · `Esc` close · `Space` play or pause.
 
-## Code
+<details>
+<summary>Mobile view</summary>
 
-HTML, CSS, JavaScript, and p5.js 1.6.0. Dependencies are included locally.
+<br>
+<img src="docs/media/mobile.png" width="300" alt="The same studio on a phone, with the preview above the controls">
 
-[studio.js](studio.js) handles the interface and media.
-[ascii-engine.js](ascii-engine.js) converts pixels to characters without changing the source.
-Still images redraw on adjustment; moving sources render at up to 24 fps.
+</details>
+
+## Flow field
+
+A separate [particle sketch](vector_path.html). Pause it, change the color, or save a frame. Click the canvas to restart.
+
+![The flow field with particle trails, pause, restart, color, and PNG controls](docs/media/flow-field.png)
+
+## Notes
+
+- Images: up to **40 MB**. Video: up to **500 MB**. Recordings: up to **five minutes**.
+- GIFs render as still images. Video formats and recording depend on browser support.
+- HTML, CSS, JavaScript, and p5.js. Dependencies are included locally.
 
 Run the conversion tests with Node:
 
