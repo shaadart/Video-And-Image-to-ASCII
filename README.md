@@ -4,7 +4,7 @@ To make ASCII art with a few clear controls and keep the source files on your de
 
 Start with an image, a video, or your camera. Adjust the characters, light, and color. Save the result. Everything runs in your browser.
 
-![The ASCII studio showing the built-in eye sample, controls, and presets](docs/media/studio.png)
+[![The ASCII studio rendering a cursor-faced, egg-shaped figure carrying a torch toward a chessboard in an Egyptian-inspired scene](docs/media/studio.png)](docs/media/torch-bearer.webp)
 
 ## Run
 
